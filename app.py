@@ -17,7 +17,7 @@ LOGO_PATH = Path(__file__).resolve().parent / "logo.png"
 
 
 # ---------------------------------------------------------------------
-# Декоративный фон
+# Декоративный фон с нейронными связями
 # ---------------------------------------------------------------------
 
 NEURON_SVG = """
@@ -75,7 +75,7 @@ TECHNIQUES = {
     "dbt_chain": {
         "title": "Цепочный анализ поведения (ДБТ)",
         "short": "Исследовать последовательность событий, реакций и последствий.",
-        "description": "Уязвимости, звенья поведения, последствия и точки вмешательства.",
+        "description": "Уязвимости, звенья цепочки, последствия и точки вмешательства.",
         "keywords": "эмоции поведение дбт реакция событие цепочка",
         "category": "Эмоции",
     },
@@ -97,17 +97,21 @@ TECHNIQUES = {
 
 
 # ---------------------------------------------------------------------
-# Состояние и навигация
+# Состояние приложения и навигация
 # ---------------------------------------------------------------------
 
 if "page" not in st.session_state:
     st.session_state.page = "home"
+
 if "selected_technique" not in st.session_state:
     st.session_state.selected_technique = None
+
 if "page_history" not in st.session_state:
     st.session_state.page_history = []
+
 if "home_search" not in st.session_state:
     st.session_state.home_search = ""
+
 if "library_search" not in st.session_state:
     st.session_state.library_search = ""
 
@@ -169,6 +173,7 @@ def search_techniques(query):
 
     words = query.split()
     results = []
+
     for technique_id, technique in TECHNIQUES.items():
         searchable = " ".join(
             [
@@ -373,6 +378,7 @@ st.markdown(
     }}
 
     .hero-copy {{ position: relative; z-index: 1; max-width: 530px; }}
+
     .hero-title {{
         margin: 0;
         color: #214D6C;
@@ -381,6 +387,7 @@ st.markdown(
         line-height: 1.04;
         letter-spacing: -.05em;
     }}
+
     .hero-subtitle {{
         max-width: 490px;
         margin: 12px 0 18px;
@@ -389,12 +396,14 @@ st.markdown(
         font-weight: 700;
         line-height: 1.3;
     }}
+
     .hero-description {{
         max-width: 460px;
         color: #476B85;
         font-size: 1.05rem;
         line-height: 1.6;
     }}
+
     .hero-art {{
         position: absolute;
         top: 50%;
@@ -403,12 +412,14 @@ st.markdown(
         transform: translateY(-50%);
         opacity: .78;
     }}
+
     .section-title {{
         margin: 28px 0 12px;
         color: #294A65;
         font-size: 1.7rem;
         font-weight: 800;
     }}
+
     .category-card {{
         min-height: 125px;
         padding: 17px;
@@ -416,7 +427,13 @@ st.markdown(
         border-radius: 18px;
         background: rgba(248,252,255,.94);
     }}
-    .category-title {{ color: #294A65; font-size: 1.04rem; font-weight: 800; }}
+
+    .category-title {{
+        color: #294A65;
+        font-size: 1.04rem;
+        font-weight: 800;
+    }}
+
     .category-description {{
         margin-top: 7px;
         color: #648198;
@@ -445,6 +462,7 @@ def render_header():
 
     with brand_col:
         logo_col, name_col = st.columns([0.6, 3.4])
+
         with logo_col:
             if LOGO_PATH.is_file():
                 st.image(str(LOGO_PATH), width=42)
@@ -465,6 +483,7 @@ def render_header():
                     """,
                     unsafe_allow_html=True,
                 )
+
         with name_col:
             st.markdown(
                 '<div class="brand-name">ПСИ-БЛОК</div>',
@@ -472,18 +491,37 @@ def render_header():
             )
 
     with home_col:
-        st.button("Главная", key="header_home", on_click=go_home,
-                  use_container_width=True)
+        st.button(
+            "Главная",
+            key="header_home",
+            on_click=go_home,
+            use_container_width=True,
+        )
+
     with library_col:
-        st.button("Библиотека", key="header_library", on_click=go_library,
-                  use_container_width=True)
+        st.button(
+            "Библиотека",
+            key="header_library",
+            on_click=go_library,
+            use_container_width=True,
+        )
+
     with about_col:
-        st.button("О проекте", key="header_about", on_click=go_about,
-                  use_container_width=True)
+        st.button(
+            "О проекте",
+            key="header_about",
+            on_click=go_about,
+            use_container_width=True,
+        )
+
     with back_col:
-        st.button("Назад", key="header_back", on_click=go_back,
-                  disabled=not st.session_state.page_history,
-                  use_container_width=True)
+        st.button(
+            "Назад",
+            key="header_back",
+            on_click=go_back,
+            disabled=not st.session_state.page_history,
+            use_container_width=True,
+        )
 
 
 def render_technique_cards(items, key_prefix):
@@ -493,8 +531,10 @@ def render_technique_cards(items, key_prefix):
 
     for start in range(0, len(items), 2):
         columns = st.columns(2)
+
         for column, (technique_id, technique) in zip(
-            columns, items[start:start + 2]
+            columns,
+            items[start:start + 2],
         ):
             with column:
                 with st.container(border=True):
@@ -513,7 +553,7 @@ def render_technique_cards(items, key_prefix):
 
 
 # ---------------------------------------------------------------------
-# Главная, библиотека и раздел «О проекте»
+# Главная страница
 # ---------------------------------------------------------------------
 
 def render_home():
@@ -549,7 +589,8 @@ def render_home():
                        C300 84 281 60 258 64 C251 47 236 46 223 54Z"
                     fill="none" stroke="#5B87A2" stroke-width="2.5"
                     stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M222 55 L222 159 M162 73 C183 83 187 101 181 117
+              <path d="M222 55 L222 159
+                       M162 73 C183 83 187 101 181 117
                        M258 64 C242 79 242 96 254 109
                        M154 119 C174 117 187 127 181 156
                        M287 108 C264 111 253 127 271 151
@@ -569,42 +610,56 @@ def render_home():
     )
 
     action_col, about_col, _ = st.columns([1.7, 1.2, 3.5])
+
     with action_col:
         st.button(
-            "Перейти в библиотеку", key="home_library_button",
-            type="primary", on_click=go_library, use_container_width=True,
+            "Перейти в библиотеку",
+            key="home_library_button",
+            type="primary",
+            on_click=go_library,
+            use_container_width=True,
         )
+
     with about_col:
         st.button(
-            "Узнать больше", key="home_about_button",
-            on_click=go_about, use_container_width=True,
+            "Узнать больше",
+            key="home_about_button",
+            on_click=go_about,
+            use_container_width=True,
         )
 
     st.markdown(
         '<div class="section-title">Найти технику</div>',
         unsafe_allow_html=True,
     )
+
     query = st.text_input(
-        "Поиск по техникам", key="home_search",
+        "Поиск по техникам",
+        key="home_search",
         placeholder="Например: тревожность, самооценка, выбор...",
         label_visibility="collapsed",
     )
 
     if query.strip():
         st.markdown("#### Результаты поиска")
-        render_technique_cards(search_techniques(query), "home_search_result")
+        render_technique_cards(
+            search_techniques(query),
+            "home_search_result",
+        )
         return
 
     st.markdown(
         '<div class="section-title">Исследуйте библиотеку</div>',
         unsafe_allow_html=True,
     )
+
     categories = [
         ("Эмоции", "Работа с эмоциональными состояниями"),
         ("Коммуникация", "Взаимодействие и отношения"),
         ("Самооценка", "Образ себя и личные границы"),
         ("Мышление", "Убеждения и автоматические мысли"),
     ]
+
     category_columns = st.columns(4)
     for column, (title, description) in zip(category_columns, categories):
         with column:
@@ -634,15 +689,25 @@ def render_home():
     )
 
 
+# ---------------------------------------------------------------------
+# Библиотека и раздел «О проекте»
+# ---------------------------------------------------------------------
+
 def render_library():
     st.title("Библиотека техник")
     st.write("Ищите по названию, теме или описанию техники.")
+
     query = st.text_input(
-        "Поиск по библиотеке", key="library_search",
+        "Поиск по библиотеке",
+        key="library_search",
         placeholder="Например: тревожность, поведение, выбор...",
         label_visibility="collapsed",
     )
-    render_technique_cards(search_techniques(query), "library_result")
+
+    render_technique_cards(
+        search_techniques(query),
+        "library_result",
+    )
 
 
 def render_about():
@@ -654,6 +719,7 @@ def render_about():
         и клиенту совместно структурировать обсуждение и фиксировать идеи.
         """
     )
+
     st.divider()
     st.subheader("Команда разработчиков")
 
@@ -677,6 +743,7 @@ def render_about():
 
     columns = st.columns(3)
     app_dir = Path(__file__).resolve().parent
+
     for column, person in zip(columns, developers):
         with column:
             with st.container(border=True):
@@ -686,19 +753,26 @@ def render_about():
                 else:
                     st.markdown(
                         """
-                        <div style="height:220px;display:flex;align-items:center;
-                        justify-content:center;border-radius:14px;
-                        background:linear-gradient(135deg,#DDEFFA,#F2F8FC);
-                        color:#5F86A0;">Фото разработчика</div>
+                        <div style="
+                            height:220px;
+                            display:flex;
+                            align-items:center;
+                            justify-content:center;
+                            border-radius:14px;
+                            background:linear-gradient(135deg,#DDEFFA,#F2F8FC);
+                            color:#5F86A0;">
+                            Фото разработчика
+                        </div>
                         """,
                         unsafe_allow_html=True,
                     )
+
                 st.markdown(f"**{html.escape(person['name'])}**")
                 st.caption(person["role"])
 
 
 # ---------------------------------------------------------------------
-# Общие функции построения и просмотра SVG
+# Общие функции визуализации
 # ---------------------------------------------------------------------
 
 SVG_COLORS = {
@@ -713,9 +787,17 @@ SVG_COLORS = {
 }
 
 
-def svg_text(x, y, value, size=14, weight=400, color=None,
-             max_chars=48, max_lines=3):
-    """Добавляет в SVG безопасный, ограниченно переносимый текст."""
+def svg_text(
+    x,
+    y,
+    value,
+    size=15,
+    weight=400,
+    color=None,
+    max_chars=48,
+    max_lines=3,
+):
+    """Формирует XML-безопасный SVG-текст с переносом строк."""
     text = " ".join(str(value or "—").split())
     words = text.split()
     lines = []
@@ -728,6 +810,7 @@ def svg_text(x, y, value, size=14, weight=400, color=None,
             line = word
         else:
             line = candidate
+
     if line:
         lines.append(line)
 
@@ -737,8 +820,9 @@ def svg_text(x, y, value, size=14, weight=400, color=None,
 
     color = color or SVG_COLORS["text"]
     tspans = []
+
     for index, item in enumerate(lines):
-        dy = 0 if index == 0 else 18
+        dy = 0 if index == 0 else size + 4
         tspans.append(
             f'<tspan x="{x}" dy="{dy}">{html.escape(item)}</tspan>'
         )
@@ -751,48 +835,96 @@ def svg_text(x, y, value, size=14, weight=400, color=None,
 
 
 def make_svg(width, height, title, body):
-    return f"""<svg xmlns="http://www.w3.org/2000/svg"
-        width="{width}" height="{height}" viewBox="0 0 {width} {height}">
-        <rect width="100%" height="100%" fill="{SVG_COLORS['panel']}"/>
-        {svg_text(32, 42, title, size=24, weight=700,
-                  color=SVG_COLORS['ink'], max_chars=80, max_lines=1)}
-        <g id="scene">{body}</g>
-    </svg>"""
+    return f"""
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="{width}" height="{height}"
+         viewBox="0 0 {width} {height}">
+      <rect width="100%" height="100%" fill="{SVG_COLORS['panel']}"/>
+      {svg_text(
+          32, 45, title, size=25, weight=700,
+          color=SVG_COLORS["ink"], max_chars=80, max_lines=1
+      )}
+      <g id="scene">{body}</g>
+    </svg>
+    """
 
 
 def render_visualization(svg, filename, caption):
-    """Панорамирование, масштабирование и скачивание схемы."""
+    """Показывает SVG с панорамированием, масштабированием и экспортом."""
     st.subheader("Визуализация")
     st.caption(caption)
 
-    html_doc = """
+    svg_name = json.dumps(filename)
+    png_name = json.dumps(filename.rsplit(".", 1)[0] + ".png")
+
+    html_doc = f"""
     <!doctype html>
     <html>
     <head>
       <meta charset="utf-8">
       <style>
-        * { box-sizing: border-box; }
-        body { margin: 0; font: 14px Arial, sans-serif; color: #234D6B; }
-        .toolbar {
-          display:flex; gap:8px; align-items:center; flex-wrap:wrap;
-          padding:8px; background:#F3F9FD;
-          border:1px solid #D4E6F2; border-radius:12px 12px 0 0;
-        }
-        button {
-          border:1px solid #AFCFE2; border-radius:8px;
-          background:white; color:#315773; padding:7px 11px;
-          cursor:pointer; font-weight:600;
-        }
-        #zoom-label { min-width:48px; text-align:center; }
-        .viewport {
-          height:520px; overflow:auto; border:1px solid #D4E6F2;
-          border-top:0; border-radius:0 0 12px 12px;
-          background:white; touch-action:none;
-        }
-        svg { display:block; width:100%; height:100%; min-width:720px; }
-        svg #scene { cursor:grab; }
-        svg #scene:active { cursor:grabbing; }
-        @media (max-width:700px) { .viewport { height:430px; } }
+        * {{ box-sizing: border-box; }}
+        html, body {{
+          margin: 0;
+          padding: 0;
+          font: 14px Arial, sans-serif;
+          color: #234D6B;
+        }}
+        body {{
+          user-select: none;
+          -webkit-user-select: none;
+        }}
+        .toolbar {{
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          flex-wrap: wrap;
+          padding: 8px;
+          background: #F3F9FD;
+          border: 1px solid #D4E6F2;
+          border-radius: 12px 12px 0 0;
+        }}
+        button {{
+          border: 1px solid #AFCFE2;
+          border-radius: 8px;
+          background: #FFFFFF;
+          color: #315773;
+          padding: 7px 11px;
+          cursor: pointer;
+          font-weight: 600;
+        }}
+        #zoom-label {{
+          min-width: 48px;
+          text-align: center;
+        }}
+        .viewport {{
+          width: 100%;
+          height: 520px;
+          overflow: auto;
+          border: 1px solid #D4E6F2;
+          border-top: 0;
+          border-radius: 0 0 12px 12px;
+          background: #FFFFFF;
+          cursor: grab;
+          touch-action: none;
+        }}
+        .viewport.dragging {{ cursor: grabbing; }}
+        .viewport svg {{
+          display: block;
+          max-width: none !important;
+          height: auto;
+          flex: none;
+          user-select: none;
+          -webkit-user-select: none;
+        }}
+        .viewport svg text {{
+          user-select: none;
+          -webkit-user-select: none;
+          pointer-events: none;
+        }}
+        @media (max-width: 700px) {{
+          .viewport {{ height: 430px; }}
+        }}
       </style>
     </head>
     <body>
@@ -804,104 +936,161 @@ def render_visualization(svg, filename, caption):
         <button id="save-svg" type="button">Скачать SVG</button>
         <button id="save-png" type="button">Скачать PNG</button>
       </div>
-      <div class="viewport" id="viewport">__SVG__</div>
+      <div class="viewport" id="viewport">{svg}</div>
+
       <script>
-        (() => {
-          const svg = document.querySelector('#viewport svg');
-          const scene = svg && svg.querySelector('#scene');
-          const label = document.getElementById('zoom-label');
-          if (!svg || !scene) return;
+        (() => {{
+          const viewport = document.getElementById("viewport");
+          const svg = viewport.querySelector("svg");
+          const label = document.getElementById("zoom-label");
+          if (!svg) return;
 
-          let scale = 1, tx = 0, ty = 0, drag = null;
-          const update = () => {
-            scene.setAttribute('transform',
-              `translate(${tx} ${ty}) scale(${scale})`);
-            label.textContent = `${Math.round(scale * 100)}%`;
-          };
+          const baseWidth = Number(svg.getAttribute("width"));
+          const baseHeight = Number(svg.getAttribute("height"));
+          let scale = 1;
+          let drag = null;
 
-          document.getElementById('plus').onclick = () => {
-            scale = Math.min(4, scale * 1.2); update();
-          };
-          document.getElementById('minus').onclick = () => {
-            scale = Math.max(.4, scale / 1.2); update();
-          };
-          document.getElementById('reset').onclick = () => {
-            scale = 1; tx = 0; ty = 0; update();
-          };
-          svg.addEventListener('wheel', (event) => {
-            event.preventDefault();
-            scale = Math.max(.4, Math.min(4,
-              scale * (event.deltaY < 0 ? 1.1 : .9)));
-            update();
-          }, {passive:false});
+          function applyScale() {{
+            svg.style.width = (baseWidth * scale) + "px";
+            svg.style.height = (baseHeight * scale) + "px";
+            label.textContent = Math.round(scale * 100) + "%";
+          }}
 
-          svg.addEventListener('pointerdown', (event) => {
-            drag = {x:event.clientX - tx, y:event.clientY - ty};
-            svg.setPointerCapture(event.pointerId);
-          });
-          svg.addEventListener('pointermove', (event) => {
+          function fitToViewport() {{
+            const availableWidth = Math.max(320, viewport.clientWidth - 8);
+            scale = Math.min(1, availableWidth / baseWidth);
+            applyScale();
+          }}
+
+          document.getElementById("plus").onclick = () => {{
+            scale = Math.min(3, scale * 1.2);
+            applyScale();
+          }};
+
+          document.getElementById("minus").onclick = () => {{
+            scale = Math.max(0.35, scale / 1.2);
+            applyScale();
+          }};
+
+          document.getElementById("reset").onclick = () => {{
+            fitToViewport();
+            viewport.scrollTo({{left: 0, top: 0}});
+          }};
+
+          viewport.addEventListener("pointerdown", (event) => {{
+            if (event.target.closest("button")) return;
+            drag = {{
+              x: event.clientX,
+              y: event.clientY,
+              left: viewport.scrollLeft,
+              top: viewport.scrollTop
+            }};
+            viewport.classList.add("dragging");
+            viewport.setPointerCapture(event.pointerId);
+          }});
+
+          viewport.addEventListener("pointermove", (event) => {{
             if (!drag) return;
-            tx = event.clientX - drag.x;
-            ty = event.clientY - drag.y;
-            update();
-          });
-          svg.addEventListener('pointerup', () => drag = null);
-          svg.addEventListener('pointercancel', () => drag = null);
+            viewport.scrollLeft = drag.left - (event.clientX - drag.x);
+            viewport.scrollTop = drag.top - (event.clientY - drag.y);
+          }});
 
-          const serialized = () => {
+          function endDrag() {{
+            drag = null;
+            viewport.classList.remove("dragging");
+          }}
+
+          viewport.addEventListener("pointerup", endDrag);
+          viewport.addEventListener("pointercancel", endDrag);
+
+          viewport.addEventListener("wheel", (event) => {{
+            if (!event.ctrlKey && !event.metaKey) return;
+            event.preventDefault();
+            scale = Math.max(
+              0.35,
+              Math.min(3, scale * (event.deltaY < 0 ? 1.1 : 0.9))
+            );
+            applyScale();
+          }}, {{passive: false}});
+
+          function serializeSvg() {{
             const clone = svg.cloneNode(true);
-            clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            clone.style.width = "";
+            clone.style.height = "";
             return new XMLSerializer().serializeToString(clone);
-          };
-          const save = (blob, name) => {
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
+          }}
+
+          function download(blob, name) {{
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
             link.download = name;
             link.click();
-            setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-          };
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          }}
 
-          document.getElementById('save-svg').onclick = () => {
-            save(new Blob([serialized()],
-              {type:'image/svg+xml;charset=utf-8'}), __SVG_NAME__);
-          };
-          document.getElementById('save-png').onclick = () => {
-            const blob = new Blob([serialized()],
-              {type:'image/svg+xml;charset=utf-8'});
-            const url = URL.createObjectURL(blob);
+          document.getElementById("save-svg").onclick = () => {{
+            download(
+              new Blob([serializeSvg()], {{
+                type: "image/svg+xml;charset=utf-8"
+              }}),
+              {svg_name}
+            );
+          }};
+
+          document.getElementById("save-png").onclick = () => {{
+            const url = URL.createObjectURL(
+              new Blob([serializeSvg()], {{
+                type: "image/svg+xml;charset=utf-8"
+              }})
+            );
             const image = new Image();
-            image.onload = () => {
-              const viewBox = svg.viewBox.baseVal;
-              const canvas = document.createElement('canvas');
-              canvas.width = viewBox.width * 2;
-              canvas.height = viewBox.height * 2;
-              const context = canvas.getContext('2d');
-              context.fillStyle = '#F7FBFF';
+
+            image.onload = () => {{
+              const canvas = document.createElement("canvas");
+              canvas.width = baseWidth * 2;
+              canvas.height = baseHeight * 2;
+              const context = canvas.getContext("2d");
+              context.fillStyle = "#F7FBFF";
               context.fillRect(0, 0, canvas.width, canvas.height);
               context.drawImage(image, 0, 0, canvas.width, canvas.height);
-              canvas.toBlob((png) => {
-                if (png) save(png, __PNG_NAME__);
+              canvas.toBlob((blob) => {{
+                if (blob) download(blob, {png_name});
                 URL.revokeObjectURL(url);
-              }, 'image/png');
-            };
+              }}, "image/png");
+            }};
+
             image.onerror = () => URL.revokeObjectURL(url);
             image.src = url;
-          };
-        })();
+          }};
+
+          fitToViewport();
+          window.addEventListener("resize", fitToViewport);
+        }})();
       </script>
     </body>
     </html>
     """
-    html_doc = (
-        html_doc.replace("__SVG__", svg)
-        .replace("__SVG_NAME__", json.dumps(filename))
-        .replace("__PNG_NAME__", json.dumps(filename.rsplit(".", 1)[0] + ".png"))
-    )
+
     components.html(html_doc, height=590, scrolling=False)
 
 
-def store_result(key, value):
-    st.session_state[key] = value
+# ---------------------------------------------------------------------
+# Дерево решений: добавление вариантов и сценариев
+# ---------------------------------------------------------------------
+
+def add_decision_option():
+    current = int(st.session_state.get("decision_option_count", 2))
+    if current < 5:
+        st.session_state.decision_option_count = current + 1
+
+
+def add_decision_scenario(option_index):
+    key = f"decision_scenario_count_{option_index}"
+    current = int(st.session_state.get(key, 1))
+    if current < 8:
+        st.session_state[key] = current + 1
 
 
 # ---------------------------------------------------------------------
@@ -911,12 +1100,12 @@ def store_result(key, value):
 def render_decision_tree():
     st.title("Дерево решений")
     st.write(
-        "Для каждого варианта опишите несколько возможных сценариев, "
-        "вероятность каждого и удовлетворённость исходом."
+        "Опишите варианты решения, возможные сценарии и свою "
+        "удовлетворённость каждым исходом."
     )
     st.caption(
-        "Вероятности сценариев внутри одного варианта должны составлять 100%. "
-        "Оценка удовлетворённости — субъективная шкала от −5 до +5."
+        "Вероятности сценариев внутри каждого варианта должны составлять "
+        "100%. Удовлетворённость оценивается по субъективной шкале от −5 до +5."
     )
 
     question = st.text_input(
@@ -924,14 +1113,20 @@ def render_decision_tree():
         key="decision_question",
         placeholder="Например: Стоит ли менять работу?",
     )
-    option_count = int(st.number_input(
-        "Количество вариантов",
-        min_value=2, max_value=5, value=2, step=1,
-        key="decision_option_count",
-    ))
 
+    if "decision_option_count" not in st.session_state:
+        st.session_state.decision_option_count = 2
+
+    option_count = int(st.session_state.decision_option_count)
     options = []
+
     for option_index in range(option_count):
+        scenario_count_key = f"decision_scenario_count_{option_index}"
+        if scenario_count_key not in st.session_state:
+            st.session_state[scenario_count_key] = 1
+
+        scenario_count = int(st.session_state[scenario_count_key])
+
         with st.container(border=True):
             st.markdown(f"### Вариант {option_index + 1}")
             name = st.text_input(
@@ -939,11 +1134,6 @@ def render_decision_tree():
                 key=f"decision_name_{option_index}",
                 placeholder=f"Вариант {option_index + 1}",
             )
-            scenario_count = int(st.number_input(
-                "Количество сценариев",
-                min_value=2, max_value=6, value=2, step=1,
-                key=f"decision_scenario_count_{option_index}",
-            ))
 
             scenarios = []
             for scenario_index in range(scenario_count):
@@ -953,24 +1143,39 @@ def render_decision_tree():
                 ):
                     title = st.text_input(
                         "Название сценария",
-                        key=f"decision_scenario_title_{option_index}_{scenario_index}",
+                        key=(
+                            f"decision_scenario_title_"
+                            f"{option_index}_{scenario_index}"
+                        ),
                         placeholder="Например: адаптация проходит успешно",
                     )
                     outcome = st.text_area(
                         "Что может произойти?",
-                        key=f"decision_scenario_outcome_{option_index}_{scenario_index}",
+                        key=(
+                            f"decision_scenario_outcome_"
+                            f"{option_index}_{scenario_index}"
+                        ),
                     )
                     probability = st.slider(
                         "Вероятность, %",
-                        min_value=0, max_value=100,
-                        value=100 // scenario_count,
-                        key=f"decision_scenario_probability_{option_index}_{scenario_index}",
+                        min_value=0,
+                        max_value=100,
+                        value=100 if scenario_count == 1 else 0,
+                        key=(
+                            f"decision_scenario_probability_"
+                            f"{option_index}_{scenario_index}"
+                        ),
                     )
                     satisfaction = st.slider(
                         "Удовлетворённость исходом",
-                        min_value=-5.0, max_value=5.0,
-                        value=0.0, step=0.5,
-                        key=f"decision_scenario_satisfaction_{option_index}_{scenario_index}",
+                        min_value=-5.0,
+                        max_value=5.0,
+                        value=0.0,
+                        step=0.5,
+                        key=(
+                            f"decision_scenario_satisfaction_"
+                            f"{option_index}_{scenario_index}"
+                        ),
                     )
                     scenarios.append({
                         "title": title,
@@ -979,156 +1184,244 @@ def render_decision_tree():
                         "satisfaction": satisfaction,
                     })
 
-            options.append({"name": name, "scenarios": scenarios})
-
-    if st.button(
-        "Сформировать дерево и сравнить",
-        key="decision_calculate",
-        type="primary",
-        use_container_width=True,
-    ):
-        errors = []
-        if not question.strip():
-            errors.append("Сформулируйте решение.")
-        if any(not option["name"].strip() for option in options):
-            errors.append("Укажите название каждого варианта.")
-
-        for option_index, option in enumerate(options, start=1):
-            total = sum(
-                scenario["probability"] for scenario in option["scenarios"]
+            probability_total = sum(
+                scenario["probability"] for scenario in scenarios
             )
-            if any(not scenario["title"].strip()
-                   for scenario in option["scenarios"]):
-                errors.append(
-                    f"Заполните названия сценариев варианта {option_index}."
-                )
-            if total != 100:
-                errors.append(
-                    f"Вероятности сценариев варианта {option_index} "
-                    f"составляют {total}%, а должны составлять 100%."
+            st.caption(
+                f"Сумма вероятностей сценариев: {probability_total}%"
+            )
+
+            if probability_total != 100:
+                st.warning(
+                    "Измените вероятности сценариев этого варианта так, "
+                    "чтобы их сумма была 100%."
                 )
 
-        if errors:
-            for error in errors:
-                st.warning(error)
-            st.session_state.pop("result_decision_tree", None)
-        else:
-            prepared = []
-            for option in options:
-                expected = sum(
-                    item["probability"] * item["satisfaction"]
-                    for item in option["scenarios"]
-                ) / 100
-                prepared.append({**option, "expected": expected})
-            store_result("result_decision_tree", {
-                "question": question,
-                "options": prepared,
+            if scenario_count < 8:
+                st.button(
+                    "＋ Добавить сценарий",
+                    key=f"decision_add_scenario_{option_index}",
+                    on_click=add_decision_scenario,
+                    args=(option_index,),
+                )
+
+            options.append({
+                "name": name,
+                "scenarios": scenarios,
+                "probability_total": probability_total,
             })
 
-    result = st.session_state.get("result_decision_tree")
-    if not result:
+    if option_count < 5:
+        st.button(
+            "＋ Добавить вариант",
+            key="decision_add_option",
+            on_click=add_decision_option,
+        )
+
+    # Расчёт обновляется автоматически при заполнении формы.
+    is_complete = (
+        bool(question.strip())
+        and all(option["name"].strip() for option in options)
+        and all(option["probability_total"] == 100 for option in options)
+        and all(
+            scenario["title"].strip()
+            for option in options
+            for scenario in option["scenarios"]
+        )
+    )
+
+    if not is_complete:
+        st.info(
+            "Заполните вопрос, названия вариантов и сценариев. "
+            "Вероятности сценариев каждой ветки должны составлять 100%; "
+            "после этого сравнение и схема появятся автоматически."
+        )
         return
 
-    options = result["options"]
-    best_option = max(options, key=lambda item: item["expected"])
-    st.subheader("Ожидаемая удовлетворённость — ориентир для обсуждения")
-    columns = st.columns(len(options))
-    for column, option in zip(columns, options):
-        with column:
-            st.metric(option["name"], f'{option["expected"]:.2f} / 5')
-            if option is best_option:
-                st.caption("Наибольшая оценка по введённым данным")
+    for option in options:
+        option["expected"] = sum(
+            scenario["probability"] * scenario["satisfaction"]
+            for scenario in option["scenarios"]
+        ) / 100
 
-    column_width = 390
+    best_value = max(option["expected"] for option in options)
+    best_options = [
+        option for option in options
+        if abs(option["expected"] - best_value) < 1e-9
+    ]
+
+    st.subheader("Автоматическое сравнение")
+    metric_columns = st.columns(len(options))
+
+    for column, option in zip(metric_columns, options):
+        with column:
+            st.metric(
+                option["name"],
+                f'{option["expected"]:.2f} / 5',
+                help=(
+                    "Средняя удовлетворённость с учётом вероятностей "
+                    "сценариев."
+                ),
+            )
+            if option in best_options:
+                st.success("Наибольшая оценка по введённым данным")
+
+    st.info(
+        "Расчёт — ориентир по введённым вероятностям и оценкам, "
+        "а не автоматическое решение за вас."
+    )
+
+    # Схема строится снизу вверх:
+    # решение → варианты → сценарии.
+    column_width = 430
+    scenario_height = 142
+    max_scenarios = max(len(option["scenarios"]) for option in options)
     chart_width = 50 + len(options) * column_width
-    scenario_height = 118
-    chart_height = 220 + max(
-        len(option["scenarios"]) for option in options
-    ) * scenario_height
+    option_y = 120 + max_scenarios * scenario_height
+    root_y = option_y + 132
+    chart_height = root_y + 115
 
     body = svg_text(
-        32, 78, result["question"], size=15,
-        max_chars=120, max_lines=2,
+        32,
+        78,
+        question,
+        size=16,
+        max_chars=110,
+        max_lines=2,
     )
 
-    root_width = 420
-    root_x = (chart_width - root_width) // 2
-    body += (
-        f'<rect x="{root_x}" y="96" width="{root_width}" height="62" '
-        f'rx="14" fill="{SVG_COLORS["accent"]}" '
-        f'stroke="{SVG_COLORS["line"]}"/>'
-    )
-    body += svg_text(
-        root_x + 16, 122, "Решение", size=16, weight=700,
-        color=SVG_COLORS["ink"], max_lines=1,
-    )
-    body += svg_text(
-        root_x + 16, 145, result["question"], size=12,
-        max_chars=48, max_lines=1,
-    )
-
+    # Линии рисуются раньше карточек, чтобы не перекрывать текст.
     for option_index, option in enumerate(options):
         x = 25 + option_index * column_width
-        option_y = 190
-        box_width = column_width - 30
+        card_x = x + 48
+        card_width = 350
+        branch_x = x + 24
+        option_center_x = card_x + card_width / 2
+
+        scenario_centers = [
+            92 + scenario_index * scenario_height + 56
+            for scenario_index in range(len(option["scenarios"]))
+        ]
+
+        if scenario_centers:
+            body += (
+                f'<line x1="{branch_x}" y1="{min(scenario_centers)}" '
+                f'x2="{branch_x}" y2="{option_y}" '
+                f'stroke="#80AFCB" stroke-width="3"/>'
+            )
+            for center_y in scenario_centers:
+                body += (
+                    f'<line x1="{branch_x}" y1="{center_y}" '
+                    f'x2="{card_x}" y2="{center_y}" '
+                    f'stroke="#80AFCB" stroke-width="3"/>'
+                )
 
         body += (
-            f'<line x1="{root_x + root_width / 2}" y1="158" '
-            f'x2="{x + box_width / 2}" y2="{option_y}" '
-            f'stroke="{SVG_COLORS["line"]}" stroke-width="2"/>'
+            f'<line x1="{option_center_x}" y1="{option_y + 78}" '
+            f'x2="{chart_width / 2}" y2="{root_y}" '
+            f'stroke="#80AFCB" stroke-width="3"/>'
         )
-        body += (
-            f'<rect x="{x}" y="{option_y}" width="{box_width}" height="64" '
-            f'rx="13" fill="{SVG_COLORS["pale"]}" '
-            f'stroke="{SVG_COLORS["line"]}"/>'
-        )
-        body += svg_text(
-            x + 13, option_y + 25, option["name"], size=15, weight=700,
-            color=SVG_COLORS["ink"], max_chars=38, max_lines=1,
-        )
-        body += svg_text(
-            x + 13, option_y + 48,
-            f'Ожидаемая удовлетворённость: {option["expected"]:.2f}',
-            size=12, max_chars=43, max_lines=1,
-        )
+
+    # Сценарии размещены выше своего варианта.
+    for option_index, option in enumerate(options):
+        x = 25 + option_index * column_width
+        card_x = x + 48
+        card_width = 350
 
         for scenario_index, scenario in enumerate(option["scenarios"]):
-            y = 274 + scenario_index * scenario_height
+            y = 92 + scenario_index * scenario_height
+
             body += (
-                f'<line x1="{x + 25}" y1="{option_y + 64}" '
-                f'x2="{x + 25}" y2="{y}" '
-                f'stroke="{SVG_COLORS["line"]}" stroke-width="2"/>'
-            )
-            body += (
-                f'<rect x="{x + 38}" y="{y}" width="{box_width - 38}" '
-                f'height="100" rx="11" fill="{SVG_COLORS["white"]}" '
-                f'stroke="{SVG_COLORS["border"]}"/>'
+                f'<rect x="{card_x}" y="{y}" width="{card_width}" '
+                f'height="112" rx="14" fill="#FFFFFF" '
+                f'stroke="#B9D9EB" stroke-width="2"/>'
             )
             body += svg_text(
-                x + 50, y + 22, scenario["title"], size=13, weight=700,
-                color=SVG_COLORS["ink"], max_chars=34, max_lines=1,
+                card_x + 16,
+                y + 28,
+                scenario["title"],
+                size=17,
+                weight=700,
+                color="#234D6B",
+                max_chars=36,
+                max_lines=1,
             )
             body += svg_text(
-                x + 50, y + 44,
-                f'Вероятность {scenario["probability"]}% · '
-                f'удовлетворённость {scenario["satisfaction"]:+.1f}',
-                size=11, max_chars=43, max_lines=1,
+                card_x + 16,
+                y + 55,
+                f'Вероятность: {scenario["probability"]}% · '
+                f'удовлетворённость: {scenario["satisfaction"]:+.1f}',
+                size=14,
+                max_chars=42,
+                max_lines=1,
             )
             body += svg_text(
-                x + 50, y + 66, scenario["outcome"],
-                size=11, max_chars=39, max_lines=2,
+                card_x + 16,
+                y + 82,
+                scenario["outcome"],
+                size=14,
+                max_chars=40,
+                max_lines=2,
             )
+
+        body += (
+            f'<rect x="{card_x}" y="{option_y}" width="{card_width}" '
+            f'height="78" rx="14" fill="#E7F3FB" '
+            f'stroke="#80AFCB" stroke-width="2"/>'
+        )
+        body += svg_text(
+            card_x + 16,
+            option_y + 30,
+            option["name"],
+            size=18,
+            weight=700,
+            color="#234D6B",
+            max_chars=36,
+            max_lines=1,
+        )
+        body += svg_text(
+            card_x + 16,
+            option_y + 58,
+            f'Ожидаемая удовлетворённость: {option["expected"]:.2f}',
+            size=14,
+            max_chars=42,
+            max_lines=1,
+        )
+
+    # Итоговый узел решения расположен внизу.
+    root_width = min(560, chart_width - 60)
+    root_x = (chart_width - root_width) / 2
+
+    body += (
+        f'<rect x="{root_x}" y="{root_y}" width="{root_width}" '
+        f'height="76" rx="16" fill="#D9EEFA" '
+        f'stroke="#6EA7CB" stroke-width="2"/>'
+    )
+    body += svg_text(
+        root_x + 18,
+        root_y + 30,
+        "Решение",
+        size=18,
+        weight=700,
+        color="#234D6B",
+        max_chars=56,
+        max_lines=1,
+    )
+    body += svg_text(
+        root_x + 18,
+        root_y + 58,
+        question,
+        size=16,
+        max_chars=60,
+        max_lines=1,
+    )
 
     svg = make_svg(chart_width, chart_height, "Дерево решений", body)
     render_visualization(
         svg,
         "decision_tree.svg",
-        "Сценарии показаны внутри вариантов; ожидаемая оценка рассчитана "
-        "как сумма оценок, взвешенных по вероятностям.",
-    )
-    st.info(
-        "Расчёт не принимает решение за вас: используйте его для обсуждения "
-        "предпочтений, ценностей и неопределённости."
+        "Схема читается снизу вверх: решение → варианты → сценарии. "
+        "Наиболее подходящий по введённым оценкам вариант вычисляется автоматически.",
     )
 
 
@@ -1166,7 +1459,10 @@ def render_chain():
 
     link_count = int(st.number_input(
         "Количество звеньев цепочки",
-        min_value=1, max_value=8, value=4, step=1,
+        min_value=1,
+        max_value=8,
+        value=4,
+        step=1,
         key="chain_link_count",
     ))
 
@@ -1177,20 +1473,25 @@ def render_chain():
             expanded=(index < 2),
         ):
             left, right = st.columns(2)
+
             with left:
                 thought = st.text_area(
                     "Мысль / интерпретация",
                     key=f"chain_thought_{index}",
                 )
                 emotion = st.text_input(
-                    "Эмоция", key=f"chain_emotion_{index}"
+                    "Эмоция",
+                    key=f"chain_emotion_{index}",
                 )
                 urge = st.text_input(
-                    "Побуждение / импульс", key=f"chain_urge_{index}"
+                    "Побуждение / импульс",
+                    key=f"chain_urge_{index}",
                 )
+
             with right:
                 body = st.text_input(
-                    "Телесные ощущения", key=f"chain_body_{index}"
+                    "Телесные ощущения",
+                    key=f"chain_body_{index}",
                 )
                 action = st.text_area(
                     "Действие / следующий шаг",
@@ -1200,11 +1501,13 @@ def render_chain():
                     "Возможная точка вмешательства",
                     key=f"chain_intervention_{index}",
                 )
+
             skill = st.text_input(
                 "Навык или поддержка для этой точки",
                 key=f"chain_skill_{index}",
                 placeholder="Например: пауза, заземление, обратиться за поддержкой",
             )
+
             links.append({
                 "thought": thought,
                 "emotion": emotion,
@@ -1216,6 +1519,7 @@ def render_chain():
             })
 
     left, right = st.columns(2)
+
     with left:
         immediate = st.text_area(
             "Последствия сразу после (для себя и других)",
@@ -1225,6 +1529,7 @@ def render_chain():
             "Что могло подкрепить поведение сразу?",
             key="chain_immediate_reinforcement",
         )
+
     with right:
         later = st.text_area(
             "Отсроченные последствия",
@@ -1255,7 +1560,7 @@ def render_chain():
             st.warning("Опишите поведение, которое анализируете.")
             st.session_state.pop("result_dbt_chain", None)
         else:
-            store_result("result_dbt_chain", {
+            st.session_state.result_dbt_chain = {
                 "vulnerability": vulnerability,
                 "trigger": trigger,
                 "target": target,
@@ -1266,7 +1571,7 @@ def render_chain():
                 "later_reinforcement": later_reinforcement,
                 "prevention": prevention,
                 "repair": repair,
-            })
+            }
 
     result = st.session_state.get("result_dbt_chain")
     if not result:
@@ -1315,39 +1620,45 @@ def render_chain():
             f'fill="{SVG_COLORS["pale"]}" stroke="{SVG_COLORS["line"]}"/>'
         )
         body += svg_text(
-            54, y + 19, label, size=12, weight=700,
-            color=SVG_COLORS["ink"], max_chars=29, max_lines=1,
+            54, y + 19, label,
+            size=13, weight=700, color=SVG_COLORS["ink"],
+            max_chars=30, max_lines=1,
         )
         body += svg_text(
-            285, y + 19, value, size=12, max_chars=108, max_lines=1,
+            285, y + 19, value,
+            size=13, max_chars=108, max_lines=1,
         )
 
     for index, link in enumerate(result["links"]):
         y = 258 + index * row_height
+
         body += (
             f'<rect x="40" y="{y}" width="1100" height="118" rx="13" '
-            f'fill="{SVG_COLORS["white"]}" stroke="{SVG_COLORS["border"]}"/>'
+            f'fill="{SVG_COLORS["white"]}" '
+            f'stroke="{SVG_COLORS["border"]}"/>'
         )
         body += svg_text(
-            56, y + 25, f"Звено {index + 1}", size=14, weight=700,
-            color=SVG_COLORS["ink"], max_lines=1,
+            56, y + 25, f"Звено {index + 1}",
+            size=15, weight=700, color=SVG_COLORS["ink"],
+            max_lines=1,
         )
         body += svg_text(
             200, y + 24,
             f'Мысль: {link["thought"]} · Эмоция: {link["emotion"]} · '
             f'Импульс: {link["urge"]}',
-            size=11, max_chars=112, max_lines=1,
+            size=13, max_chars=112, max_lines=1,
         )
         body += svg_text(
             200, y + 54,
             f'Ощущения: {link["body"]} · Действие: {link["action"]}',
-            size=11, max_chars=112, max_lines=1,
+            size=13, max_chars=112, max_lines=1,
         )
         body += svg_text(
             200, y + 84,
             f'Вмешательство: {link["intervention"]} · Навык: {link["skill"]}',
-            size=11, max_chars=112, max_lines=1,
+            size=13, max_chars=112, max_lines=1,
         )
+
         if index < len(result["links"]) - 1:
             body += (
                 f'<line x1="590" y1="{y + 118}" x2="590" '
@@ -1356,23 +1667,29 @@ def render_chain():
             )
 
     footer_y = 258 + len(result["links"]) * row_height
+
     for index, (label, value) in enumerate([
         ("Последствия сразу", result["immediate"]),
         ("Отсроченные последствия", result["later"]),
-        ("Профилактика / восстановление",
-         f'{result["prevention"]} · {result["repair"]}'),
+        (
+            "Профилактика / восстановление",
+            f'{result["prevention"]} · {result["repair"]}',
+        ),
     ]):
         y = footer_y + index * 52
         body += (
             f'<rect x="40" y="{y}" width="1100" height="42" rx="9" '
-            f'fill="{SVG_COLORS["accent"]}" stroke="{SVG_COLORS["line"]}"/>'
+            f'fill="{SVG_COLORS["accent"]}" '
+            f'stroke="{SVG_COLORS["line"]}"/>'
         )
         body += svg_text(
-            54, y + 18, label, size=11, weight=700,
-            color=SVG_COLORS["ink"], max_chars=32, max_lines=1,
+            54, y + 18, label,
+            size=12, weight=700, color=SVG_COLORS["ink"],
+            max_chars=33, max_lines=1,
         )
         body += svg_text(
-            285, y + 18, value, size=11, max_chars=104, max_lines=1,
+            285, y + 18, value,
+            size=12, max_chars=104, max_lines=1,
         )
 
     svg = make_svg(width, height, "ДБТ · анализ цепочки и решений", body)
@@ -1402,10 +1719,16 @@ def render_exposure():
         "и получить новый опыт."
     )
 
-    goal = st.text_area("Цель / ситуация для работы", key="exposure_goal")
+    goal = st.text_area(
+        "Цель / ситуация для работы",
+        key="exposure_goal",
+    )
     step_count = int(st.number_input(
         "Количество ступеней",
-        min_value=1, max_value=10, value=3, step=1,
+        min_value=1,
+        max_value=10,
+        value=3,
+        step=1,
         key="exposure_count",
     ))
 
@@ -1416,11 +1739,15 @@ def render_exposure():
                 "Ситуация / упражнение",
                 key=f"exposure_situation_{index}",
             )
+
             left, right = st.columns(2)
+
             with left:
                 expected = st.slider(
                     "Ожидаемая тревога (0–10)",
-                    min_value=0, max_value=10, value=3,
+                    min_value=0,
+                    max_value=10,
+                    value=3,
                     key=f"exposure_distress_{index}",
                 )
                 prediction = st.text_area(
@@ -1431,6 +1758,7 @@ def render_exposure():
                     "Посильный план практики",
                     key=f"exposure_plan_{index}",
                 )
+
             with right:
                 practiced = st.checkbox(
                     "Практика выполнена",
@@ -1438,17 +1766,23 @@ def render_exposure():
                 )
                 start = st.slider(
                     "Тревога в начале (0–10)",
-                    min_value=0, max_value=10, value=0,
+                    min_value=0,
+                    max_value=10,
+                    value=0,
                     key=f"exposure_start_{index}",
                 )
                 peak = st.slider(
                     "Максимальная тревога (0–10)",
-                    min_value=0, max_value=10, value=0,
+                    min_value=0,
+                    max_value=10,
+                    value=0,
                     key=f"exposure_peak_{index}",
                 )
                 after = st.slider(
                     "Тревога после практики (0–10)",
-                    min_value=0, max_value=10, value=0,
+                    min_value=0,
+                    max_value=10,
+                    value=0,
                     key=f"exposure_after_{index}",
                 )
                 outcome = st.text_area(
@@ -1480,23 +1814,26 @@ def render_exposure():
         use_container_width=True,
     ):
         completed = [
-            step for step in steps if step["situation"].strip()
+            step for step in steps
+            if step["situation"].strip()
         ]
+
         if not completed:
             st.warning("Добавьте описание хотя бы одной ступени.")
             st.session_state.pop("result_exposure", None)
         else:
             completed.sort(key=lambda step: step["expected"])
-            store_result("result_exposure", {
+            st.session_state.result_exposure = {
                 "goal": goal,
                 "steps": completed,
-            })
+            }
 
     result = st.session_state.get("result_exposure")
     if not result:
         return
 
     st.subheader("Лестница: от меньшей ожидаемой тревоги к большей")
+
     for index, step in enumerate(result["steps"], start=1):
         with st.container(border=True):
             st.markdown(
@@ -1521,46 +1858,71 @@ def render_exposure():
     width = 1300
     row_height = 105
     height = 130 + len(result["steps"]) * row_height
+
     body = svg_text(
-        35, 78, f'Цель: {result["goal"]}', size=14,
-        max_chars=115, max_lines=1,
+        35,
+        78,
+        f'Цель: {result["goal"]}',
+        size=15,
+        max_chars=115,
+        max_lines=1,
     )
 
     for index, step in enumerate(result["steps"]):
-        x, y = 45, 98 + index * row_height
+        x = 45
+        y = 98 + index * row_height
         bar_width = 230 + step["expected"] * 48
+
         body += (
             f'<rect x="{x}" y="{y}" width="{bar_width}" height="70" '
             f'rx="12" fill="{SVG_COLORS["accent"]}" '
             f'stroke="{SVG_COLORS["line"]}"/>'
         )
         body += svg_text(
-            x + 12, y + 23, f'{index + 1}. {step["situation"]}',
-            size=12, weight=700, color=SVG_COLORS["ink"],
-            max_chars=48, max_lines=1,
+            x + 12,
+            y + 24,
+            f'{index + 1}. {step["situation"]}',
+            size=14,
+            weight=700,
+            color=SVG_COLORS["ink"],
+            max_chars=48,
+            max_lines=1,
         )
         body += svg_text(
-            x + 12, y + 48,
+            x + 12,
+            y + 51,
             f'Ожидаемая тревога: {step["expected"]}/10',
-            size=11, max_chars=42, max_lines=1,
+            size=13,
+            max_chars=42,
+            max_lines=1,
         )
 
         if step["practiced"]:
             body += svg_text(
-                720, y + 22,
+                720,
+                y + 24,
                 f'Фактические оценки · начало {step["start"]} / '
                 f'пик {step["peak"]} / после {step["after"]}',
-                size=11, max_chars=76, max_lines=1,
+                size=13,
+                max_chars=76,
+                max_lines=1,
             )
             body += svg_text(
-                720, y + 48,
+                720,
+                y + 51,
                 f'Наблюдение: {step["outcome"] or step["learning"] or "не записано"}',
-                size=11, max_chars=76, max_lines=1,
+                size=13,
+                max_chars=76,
+                max_lines=1,
             )
         else:
             body += svg_text(
-                720, y + 34, "Практика пока не отмечена",
-                size=11, max_chars=65, max_lines=1,
+                720,
+                y + 38,
+                "Практика пока не отмечена",
+                size=13,
+                max_chars=65,
+                max_lines=1,
             )
 
         if index < len(result["steps"]) - 1:
@@ -1586,12 +1948,12 @@ def render_exposure():
 def render_act_matrix():
     st.title("ACT-матрица")
     st.write(
-        "Заметьте внутренний опыт, действия от дискомфорта и действия, "
-        "которые приближают к важному."
+        "Заметьте внутренний и внешний опыт, движения от дискомфорта "
+        "и действия в сторону того, что важно."
     )
     st.info(
         "Матрица — способ исследовать выбор, а не оценка поведения. "
-        "Записывайте несколько пунктов через новую строку."
+        "В поля можно записывать несколько пунктов через новую строку."
     )
 
     situation = st.text_area(
@@ -1610,24 +1972,27 @@ def render_act_matrix():
     )
 
     left, right = st.columns(2)
+
     with left:
         away = st.text_area(
-            "Действия от дискомфорта: что вы делаете, "
-            "чтобы уйти от неприятного?",
+            "Действия от дискомфорта",
             key="act_away",
+            help="Что вы делаете, чтобы уйти от неприятного опыта?",
         )
         inner = st.text_area(
-            "Внутренний опыт, от которого хочется уйти",
+            "Внутренний опыт",
             key="act_inner",
-            placeholder="Мысли, эмоции, воспоминания, импульсы, ощущения",
+            help="Мысли, эмоции, воспоминания, импульсы и ощущения.",
         )
+
     with right:
         toward = st.text_area(
-            "Действия к важному: что помогает приближаться к ценностям?",
+            "Действия к важному",
             key="act_toward",
+            help="Что приближает к людям и ценностям, которые важны?",
         )
         toward_inner = st.text_area(
-            "Что может возникать внутри, когда вы движетесь к важному?",
+            "Внутренний опыт при движении к важному",
             key="act_toward_inner",
         )
 
@@ -1646,7 +2011,7 @@ def render_act_matrix():
             st.warning("Добавьте ситуацию, которую исследуете.")
             st.session_state.pop("result_act_matrix", None)
         else:
-            store_result("result_act_matrix", {
+            st.session_state.result_act_matrix = {
                 "situation": situation,
                 "values": values,
                 "external": external,
@@ -1655,7 +2020,7 @@ def render_act_matrix():
                 "toward": toward,
                 "toward_inner": toward_inner,
                 "step": chosen_step,
-            })
+            }
 
     result = st.session_state.get("result_act_matrix")
     if not result:
@@ -1666,78 +2031,120 @@ def render_act_matrix():
     st.write(f'**Что важно:** {result["values"] or "—"}')
     st.write(f'**Небольшой шаг:** {result["step"] or "—"}')
 
-    width, height = 1120, 760
-    left_x, right_x = 55, 575
-    top_y, bottom_y = 125, 395
-    box_width, box_height = 490, 245
+    width, height = 1200, 800
+    left_x, right_x = 55, 615
+    top_y, bottom_y = 125, 420
+    box_width, box_height = 530, 265
 
     quadrants = [
-        (left_x, top_y, "ДЕЙСТВИЯ ОТ ДИСКОМФОРТА", result["away"]),
-        (right_x, top_y, "ДЕЙСТВИЯ К ВАЖНОМУ", result["toward"]),
-        (left_x, bottom_y, "ВНУТРЕННИЙ ОПЫТ", result["inner"]),
-        (right_x, bottom_y, "ВНУТРЕННИЙ ОПЫТ ПРИ ДВИЖЕНИИ К ВАЖНОМУ",
-         result["toward_inner"]),
+        (
+            left_x,
+            top_y,
+            "ВНЕШНИЙ ОПЫТ · ПЯТЬ ЧУВСТВ",
+            result["external"],
+        ),
+        (
+            right_x,
+            top_y,
+            "ДЕЙСТВИЯ К ВАЖНОМУ",
+            result["toward"],
+        ),
+        (
+            left_x,
+            bottom_y,
+            "ВНУТРЕННИЙ ОПЫТ · УМ И ТЕЛО",
+            result["inner"],
+        ),
+        (
+            right_x,
+            bottom_y,
+            "ДЕЙСТВИЯ ОТ ДИСКОМФОРТА",
+            result["away"],
+        ),
     ]
 
     body = svg_text(
-        55, 82, f'Контекст: {result["situation"]}',
-        size=13, max_chars=112, max_lines=1,
+        55,
+        82,
+        f'Контекст: {result["situation"]}',
+        size=16,
+        max_chars=112,
+        max_lines=1,
     )
 
     for x, y, label, value in quadrants:
         body += (
             f'<rect x="{x}" y="{y}" width="{box_width}" '
-            f'height="{box_height}" rx="15" '
-            f'fill="{SVG_COLORS["white"]}" '
-            f'stroke="{SVG_COLORS["line"]}" stroke-width="2"/>'
+            f'height="{box_height}" rx="16" fill="#FFFFFF" '
+            f'stroke="#80AFCB" stroke-width="2"/>'
         )
         body += svg_text(
-            x + 16, y + 27, label,
-            size=12, weight=700, color=SVG_COLORS["ink"],
-            max_chars=56, max_lines=1,
+            x + 20,
+            y + 36,
+            label,
+            size=16,
+            weight=700,
+            color="#234D6B",
+            max_chars=56,
+            max_lines=1,
         )
-        items = [item.strip() for item in (value or "").splitlines()
-                 if item.strip()]
+
+        items = [
+            item.strip()
+            for item in (value or "").splitlines()
+            if item.strip()
+        ][:7]
+
         if not items:
             body += svg_text(
-                x + 18, y + 63, "—",
-                size=13, max_chars=52, max_lines=1,
+                x + 22,
+                y + 82,
+                "—",
+                size=16,
+                max_chars=55,
+                max_lines=1,
             )
         else:
-            for item_index, item in enumerate(items[:7]):
-                item_y = y + 62 + item_index * 24
+            for index, item in enumerate(items):
+                item_y = y + 82 + index * 26
                 body += (
-                    f'<circle cx="{x + 22}" cy="{item_y - 4}" r="4" '
-                    f'fill="{SVG_COLORS["line"]}"/>'
+                    f'<circle cx="{x + 25}" cy="{item_y - 5}" '
+                    f'r="5" fill="#80AFCB"/>'
                 )
                 body += svg_text(
-                    x + 36, item_y, item,
-                    size=12, max_chars=57, max_lines=1,
+                    x + 43,
+                    item_y,
+                    item,
+                    size=16,
+                    max_chars=55,
+                    max_lines=1,
                 )
 
-    # Оси матрицы: горизонталь «от дискомфорта — к важному»,
-    # вертикаль «внутренний опыт — наблюдаемое поведение».
     body += (
-        f'<line x1="560" y1="112" x2="560" y2="655" '
-        f'stroke="{SVG_COLORS["ink"]}" stroke-width="3"/>'
+        '<line x1="600" y1="112" x2="600" y2="700" '
+        'stroke="#234D6B" stroke-width="3"/>'
     )
     body += (
-        f'<line x1="42" y1="383" x2="1078" y2="383" '
-        f'stroke="{SVG_COLORS["ink"]}" stroke-width="3"/>'
+        '<line x1="42" y1="405" x2="1158" y2="405" '
+        'stroke="#234D6B" stroke-width="3"/>'
     )
     body += svg_text(
-        55, 700,
-        f'Что важно: {result["values"] or "—"} · '
+        55,
+        740,
+        f'Ценности: {result["values"] or "—"} · '
         f'Выбранный шаг: {result["step"] or "—"}',
-        size=12, max_chars=120, max_lines=2,
+        size=15,
+        max_chars=125,
+        max_lines=2,
     )
 
     svg = make_svg(width, height, "ACT-матрица · замечать и выбирать", body)
     render_visualization(
         svg,
         "act_matrix.svg",
-        "Матрица помогает сопоставить движения от дискомфорта и к важному, "
-        "замечая внутренний опыт, который может возникать в обоих случаях.",
+        "Схема сопоставляет внешний и внутренний опыт с действиями к важному "
+        "и от дискомфорта. Используйте прокрутку и кнопки масштаба, "
+        "чтобы рассмотреть её целиком.",
     )
 
 
@@ -1747,12 +2154,14 @@ def render_act_matrix():
 
 def render_selected_technique():
     technique_id = st.session_state.selected_technique
+
     renderers = {
         "decision_tree": render_decision_tree,
         "dbt_chain": render_chain,
         "exposure": render_exposure,
         "act_matrix": render_act_matrix,
     }
+
     renderer = renderers.get(technique_id)
     if renderer:
         renderer()
