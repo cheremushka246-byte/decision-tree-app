@@ -200,7 +200,9 @@ st.markdown(
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&display=swap');
 
-    :root {{ color-scheme: light !important; }}
+    :root {{
+        color-scheme: light !important;
+    }}
 
     html, body, [data-testid="stAppViewContainer"] {{
         color-scheme: light !important;
@@ -233,7 +235,9 @@ st.markdown(
         z-index: 1;
     }}
 
-    [data-testid="stHeader"] {{ background: transparent !important; }}
+    [data-testid="stHeader"] {{
+        background: transparent !important;
+    }}
 
     .block-container {{
         max-width: 1160px;
@@ -797,7 +801,7 @@ def svg_text(
     max_chars=48,
     max_lines=3,
 ):
-    """Формирует XML-безопасный SVG-текст с переносом строк."""
+    """Формирует XML-безопасный SVG-текст с переносами строк."""
     text = " ".join(str(value or "—").split())
     words = text.split()
     lines = []
@@ -834,17 +838,31 @@ def svg_text(
     )
 
 
-def make_svg(width, height, title, body):
+def make_svg(width, height, title, body, accent="#D9EEFA"):
+    background_fill = f"url(#bgGrad_{accent.replace('#','')})"
     return f"""
     <svg xmlns="http://www.w3.org/2000/svg"
          width="{width}" height="{height}"
          viewBox="0 0 {width} {height}">
-      <rect width="100%" height="100%" fill="{SVG_COLORS['panel']}"/>
+      <defs>
+        <linearGradient id="bgGrad_{accent.replace('#','')}" x1="0%" x2="100%" y1="0%" y2="100%">
+          <stop offset="0%" stop-color="#F8FCFF"/>
+          <stop offset="100%" stop-color="#EAF5FC"/>
+        </linearGradient>
+        <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#7AAEC7" flood-opacity="0.16"/>
+        </filter>
+      </defs>
+      <rect width="100%" height="100%" fill="{background_fill}" rx="18"/>
+      <g opacity="0.18">
+        <path d="M0 200 L120 150 L200 220 L320 180 L520 250" stroke="#8BBDDB" fill="none" stroke-width="1.5"/>
+        <path d="M140 540 L310 450 L470 520 L700 430 L860 520" stroke="#8BBDDB" fill="none" stroke-width="1.5"/>
+      </g>
       {svg_text(
           32, 45, title, size=25, weight=700,
           color=SVG_COLORS["ink"], max_chars=80, max_lines=1
       )}
-      <g id="scene">{body}</g>
+      <g id="scene" filter="url(#softShadow)">{body}</g>
     </svg>
     """
 
@@ -1093,6 +1111,14 @@ def add_decision_scenario(option_index):
         st.session_state[key] = current + 1
 
 
+def color_for_metric(value):
+    if value > 0:
+        return "#2E9C7A"
+    if value < 0:
+        return "#D76E5B"
+    return "#4B8DB5"
+
+
 # ---------------------------------------------------------------------
 # Дерево решений
 # ---------------------------------------------------------------------
@@ -1187,9 +1213,7 @@ def render_decision_tree():
             probability_total = sum(
                 scenario["probability"] for scenario in scenarios
             )
-            st.caption(
-                f"Сумма вероятностей сценариев: {probability_total}%"
-            )
+            st.caption(f"Сумма вероятностей сценариев: {probability_total}%")
 
             if probability_total != 100:
                 st.warning(
@@ -1218,7 +1242,6 @@ def render_decision_tree():
             on_click=add_decision_option,
         )
 
-    # Расчёт обновляется автоматически при заполнении формы.
     is_complete = (
         bool(question.strip())
         and all(option["name"].strip() for option in options)
@@ -1264,22 +1287,33 @@ def render_decision_tree():
                 ),
             )
             if option in best_options:
-                st.success("Наибольшая оценка по введённым данным")
+                st.success("Наиболее подходящий вариант")
 
     st.info(
         "Расчёт — ориентир по введённым вероятностям и оценкам, "
         "а не автоматическое решение за вас."
     )
 
-    # Схема строится снизу вверх:
-    # решение → варианты → сценарии.
+    decision_palette = {
+        "root": "#0d5c89",
+        "root_fill": "#D7EEFA",
+        "branch": "#7CB6D8",
+        "option_fill": "#EFF9FF",
+        "option_border": "#9AD0EC",
+        "scenario_fill": "#FFFFFF",
+        "scenario_border": "#C6E3F4",
+        "best": "#2E9C7A",
+        "best_border": "#61C29A",
+        "text": "#214D6C",
+    }
+
     column_width = 430
-    scenario_height = 142
+    scenario_height = 138
     max_scenarios = max(len(option["scenarios"]) for option in options)
     chart_width = 50 + len(options) * column_width
     option_y = 120 + max_scenarios * scenario_height
-    root_y = option_y + 132
-    chart_height = root_y + 115
+    root_y = option_y + 136
+    chart_height = root_y + 120
 
     body = svg_text(
         32,
@@ -1288,9 +1322,9 @@ def render_decision_tree():
         size=16,
         max_chars=110,
         max_lines=2,
+        color=decision_palette["text"],
     )
 
-    # Линии рисуются раньше карточек, чтобы не перекрывать текст.
     for option_index, option in enumerate(options):
         x = 25 + option_index * column_width
         card_x = x + 48
@@ -1307,34 +1341,34 @@ def render_decision_tree():
             body += (
                 f'<line x1="{branch_x}" y1="{min(scenario_centers)}" '
                 f'x2="{branch_x}" y2="{option_y}" '
-                f'stroke="#80AFCB" stroke-width="3"/>'
+                f'stroke="{decision_palette["branch"]}" stroke-width="3"/>'
             )
             for center_y in scenario_centers:
                 body += (
                     f'<line x1="{branch_x}" y1="{center_y}" '
                     f'x2="{card_x}" y2="{center_y}" '
-                    f'stroke="#80AFCB" stroke-width="3"/>'
+                    f'stroke="{decision_palette["branch"]}" stroke-width="3"/>'
                 )
 
         body += (
             f'<line x1="{option_center_x}" y1="{option_y + 78}" '
             f'x2="{chart_width / 2}" y2="{root_y}" '
-            f'stroke="#80AFCB" stroke-width="3"/>'
+            f'stroke="{decision_palette["branch"]}" stroke-width="3"/>'
         )
 
-    # Сценарии размещены выше своего варианта.
     for option_index, option in enumerate(options):
         x = 25 + option_index * column_width
         card_x = x + 48
         card_width = 350
+        is_best = option in best_options
 
         for scenario_index, scenario in enumerate(option["scenarios"]):
             y = 92 + scenario_index * scenario_height
 
             body += (
                 f'<rect x="{card_x}" y="{y}" width="{card_width}" '
-                f'height="112" rx="14" fill="#FFFFFF" '
-                f'stroke="#B9D9EB" stroke-width="2"/>'
+                f'height="110" rx="14" fill="{decision_palette["scenario_fill"]}" '
+                f'stroke="{decision_palette["scenario_border"]}" stroke-width="2"/>'
             )
             body += svg_text(
                 card_x + 16,
@@ -1342,7 +1376,7 @@ def render_decision_tree():
                 scenario["title"],
                 size=17,
                 weight=700,
-                color="#234D6B",
+                color=decision_palette["text"],
                 max_chars=36,
                 max_lines=1,
             )
@@ -1354,6 +1388,7 @@ def render_decision_tree():
                 size=14,
                 max_chars=42,
                 max_lines=1,
+                color=color_for_metric(scenario["satisfaction"]),
             )
             body += svg_text(
                 card_x + 16,
@@ -1362,20 +1397,25 @@ def render_decision_tree():
                 size=14,
                 max_chars=40,
                 max_lines=2,
+                color=decision_palette["text"],
             )
+
+        option_fill = decision_palette["best"] if is_best else decision_palette["option_fill"]
+        option_border = decision_palette["best_border"] if is_best else decision_palette["option_border"]
+        option_title = "Лидер" if is_best else option["name"]
 
         body += (
             f'<rect x="{card_x}" y="{option_y}" width="{card_width}" '
-            f'height="78" rx="14" fill="#E7F3FB" '
-            f'stroke="#80AFCB" stroke-width="2"/>'
+            f'height="78" rx="16" fill="{option_fill}" '
+            f'stroke="{option_border}" stroke-width="2.4"/>'
         )
         body += svg_text(
             card_x + 16,
-            option_y + 30,
-            option["name"],
+            option_y + 29,
+            option_title,
             size=18,
             weight=700,
-            color="#234D6B",
+            color=decision_palette["ink"],
             max_chars=36,
             max_lines=1,
         )
@@ -1386,24 +1426,24 @@ def render_decision_tree():
             size=14,
             max_chars=42,
             max_lines=1,
+            color=decision_palette["text"],
         )
 
-    # Итоговый узел решения расположен внизу.
     root_width = min(560, chart_width - 60)
     root_x = (chart_width - root_width) / 2
 
     body += (
         f'<rect x="{root_x}" y="{root_y}" width="{root_width}" '
-        f'height="76" rx="16" fill="#D9EEFA" '
-        f'stroke="#6EA7CB" stroke-width="2"/>'
+        f'height="76" rx="18" fill="{decision_palette["root_fill"]}" '
+        f'stroke="{decision_palette["root"]}" stroke-width="2.5"/>'
     )
     body += svg_text(
         root_x + 18,
         root_y + 30,
         "Решение",
-        size=18,
+        size=19,
         weight=700,
-        color="#234D6B",
+        color=decision_palette["root"],
         max_chars=56,
         max_lines=1,
     )
@@ -1414,9 +1454,10 @@ def render_decision_tree():
         size=16,
         max_chars=60,
         max_lines=1,
+        color=decision_palette["text"],
     )
 
-    svg = make_svg(chart_width, chart_height, "Дерево решений", body)
+    svg = make_svg(chart_width, chart_height, "Дерево решений", body, accent="#CFE9F6")
     render_visualization(
         svg,
         "decision_tree.svg",
@@ -1607,6 +1648,17 @@ def render_chain():
     width = 1180
     row_height = 142
     height = 265 + len(result["links"]) * row_height + 190
+
+    dbt_palette = {
+        "bg": "#EEF6FA",
+        "header": "#C8E7F6",
+        "card": "#FFFFFF",
+        "card_border": "#B8D9EE",
+        "line": "#7AAABD",
+        "ink": "#214D6C",
+        "text": "#3C6888",
+    }
+
     body = ""
 
     for row_index, (label, value) in enumerate([
@@ -1617,16 +1669,17 @@ def render_chain():
         y = 75 + row_index * 58
         body += (
             f'<rect x="40" y="{y}" width="1100" height="46" rx="10" '
-            f'fill="{SVG_COLORS["pale"]}" stroke="{SVG_COLORS["line"]}"/>'
+            f'fill="{dbt_palette["header"]}" stroke="{dbt_palette["line"]}"/>'
         )
         body += svg_text(
             54, y + 19, label,
-            size=13, weight=700, color=SVG_COLORS["ink"],
+            size=13, weight=700, color=dbt_palette["ink"],
             max_chars=30, max_lines=1,
         )
         body += svg_text(
             285, y + 19, value,
             size=13, max_chars=108, max_lines=1,
+            color=dbt_palette["text"],
         )
 
     for index, link in enumerate(result["links"]):
@@ -1634,12 +1687,11 @@ def render_chain():
 
         body += (
             f'<rect x="40" y="{y}" width="1100" height="118" rx="13" '
-            f'fill="{SVG_COLORS["white"]}" '
-            f'stroke="{SVG_COLORS["border"]}"/>'
+            f'fill="{dbt_palette["card"]}" stroke="{dbt_palette["card_border"]}"/>'
         )
         body += svg_text(
             56, y + 25, f"Звено {index + 1}",
-            size=15, weight=700, color=SVG_COLORS["ink"],
+            size=15, weight=700, color=dbt_palette["ink"],
             max_lines=1,
         )
         body += svg_text(
@@ -1647,22 +1699,25 @@ def render_chain():
             f'Мысль: {link["thought"]} · Эмоция: {link["emotion"]} · '
             f'Импульс: {link["urge"]}',
             size=13, max_chars=112, max_lines=1,
+            color=dbt_palette["text"],
         )
         body += svg_text(
             200, y + 54,
             f'Ощущения: {link["body"]} · Действие: {link["action"]}',
             size=13, max_chars=112, max_lines=1,
+            color=dbt_palette["text"],
         )
         body += svg_text(
             200, y + 84,
             f'Вмешательство: {link["intervention"]} · Навык: {link["skill"]}',
             size=13, max_chars=112, max_lines=1,
+            color=dbt_palette["text"],
         )
 
         if index < len(result["links"]) - 1:
             body += (
                 f'<line x1="590" y1="{y + 118}" x2="590" '
-                f'y2="{y + row_height}" stroke="{SVG_COLORS["line"]}" '
+                f'y2="{y + row_height}" stroke="{dbt_palette["line"]}" '
                 f'stroke-width="2"/>'
             )
 
@@ -1679,20 +1734,20 @@ def render_chain():
         y = footer_y + index * 52
         body += (
             f'<rect x="40" y="{y}" width="1100" height="42" rx="9" '
-            f'fill="{SVG_COLORS["accent"]}" '
-            f'stroke="{SVG_COLORS["line"]}"/>'
+            f'fill="{dbt_palette["header"]}" stroke="{dbt_palette["line"]}"/>'
         )
         body += svg_text(
             54, y + 18, label,
-            size=12, weight=700, color=SVG_COLORS["ink"],
+            size=12, weight=700, color=dbt_palette["ink"],
             max_chars=33, max_lines=1,
         )
         body += svg_text(
             285, y + 18, value,
             size=12, max_chars=104, max_lines=1,
+            color=dbt_palette["text"],
         )
 
-    svg = make_svg(width, height, "ДБТ · анализ цепочки и решений", body)
+    svg = make_svg(width, height, "ДБТ · анализ цепочки и решений", body, accent="#CFE7F4")
     render_visualization(
         svg,
         "dbt_chain.svg",
@@ -1813,10 +1868,7 @@ def render_exposure():
         type="primary",
         use_container_width=True,
     ):
-        completed = [
-            step for step in steps
-            if step["situation"].strip()
-        ]
+        completed = [step for step in steps if step["situation"].strip()]
 
         if not completed:
             st.warning("Добавьте описание хотя бы одной ступени.")
@@ -1859,6 +1911,16 @@ def render_exposure():
     row_height = 105
     height = 130 + len(result["steps"]) * row_height
 
+    exposure_palette = {
+        "bg": "#EAF8F9",
+        "card": "#F5FCFF",
+        "card_border": "#9DD9D6",
+        "bar": "#66B7B6",
+        "bar_soft": "#D7F2F0",
+        "ink": "#1B5D68",
+        "text": "#2F6C73",
+    }
+
     body = svg_text(
         35,
         78,
@@ -1866,6 +1928,7 @@ def render_exposure():
         size=15,
         max_chars=115,
         max_lines=1,
+        color=exposure_palette["ink"],
     )
 
     for index, step in enumerate(result["steps"]):
@@ -1875,8 +1938,8 @@ def render_exposure():
 
         body += (
             f'<rect x="{x}" y="{y}" width="{bar_width}" height="70" '
-            f'rx="12" fill="{SVG_COLORS["accent"]}" '
-            f'stroke="{SVG_COLORS["line"]}"/>'
+            f'rx="12" fill="{exposure_palette["bar_soft"]}" '
+            f'stroke="{exposure_palette["card_border"]}" stroke-width="2"/>'
         )
         body += svg_text(
             x + 12,
@@ -1884,7 +1947,7 @@ def render_exposure():
             f'{index + 1}. {step["situation"]}',
             size=14,
             weight=700,
-            color=SVG_COLORS["ink"],
+            color=exposure_palette["ink"],
             max_chars=48,
             max_lines=1,
         )
@@ -1895,6 +1958,7 @@ def render_exposure():
             size=13,
             max_chars=42,
             max_lines=1,
+            color=exposure_palette["text"],
         )
 
         if step["practiced"]:
@@ -1906,6 +1970,7 @@ def render_exposure():
                 size=13,
                 max_chars=76,
                 max_lines=1,
+                color=exposure_palette["ink"],
             )
             body += svg_text(
                 720,
@@ -1914,6 +1979,7 @@ def render_exposure():
                 size=13,
                 max_chars=76,
                 max_lines=1,
+                color=exposure_palette["text"],
             )
         else:
             body += svg_text(
@@ -1923,16 +1989,17 @@ def render_exposure():
                 size=13,
                 max_chars=65,
                 max_lines=1,
+                color=exposure_palette["text"],
             )
 
         if index < len(result["steps"]) - 1:
             body += (
                 f'<line x1="{x + 24}" y1="{y + 70}" '
                 f'x2="{x + 24}" y2="{y + row_height}" '
-                f'stroke="{SVG_COLORS["line"]}" stroke-width="2"/>'
+                f'stroke="{exposure_palette["card_border"]}" stroke-width="2"/>'
             )
 
-    svg = make_svg(width, height, "Иерархия экспозиции", body)
+    svg = make_svg(width, height, "Иерархия экспозиции", body, accent="#CBEDE7")
     render_visualization(
         svg,
         "exposure_hierarchy.svg",
@@ -2036,31 +2103,21 @@ def render_act_matrix():
     top_y, bottom_y = 125, 420
     box_width, box_height = 530, 265
 
+    act_palette = {
+        "bg": "#EEF8FF",
+        "panel": "#FFFFFF",
+        "panel_border": "#9CC9E8",
+        "title_bg": "#E7F4FF",
+        "ink": "#214D6C",
+        "text": "#3A678B",
+        "mark": "#7AAECB",
+    }
+
     quadrants = [
-        (
-            left_x,
-            top_y,
-            "ВНЕШНИЙ ОПЫТ · ПЯТЬ ЧУВСТВ",
-            result["external"],
-        ),
-        (
-            right_x,
-            top_y,
-            "ДЕЙСТВИЯ К ВАЖНОМУ",
-            result["toward"],
-        ),
-        (
-            left_x,
-            bottom_y,
-            "ВНУТРЕННИЙ ОПЫТ · УМ И ТЕЛО",
-            result["inner"],
-        ),
-        (
-            right_x,
-            bottom_y,
-            "ДЕЙСТВИЯ ОТ ДИСКОМФОРТА",
-            result["away"],
-        ),
+        ("ВНЕШНИЙ ОПЫТ · ПЯТЬ ЧУВСТВ", left_x, top_y, result["external"]),
+        ("ДЕЙСТВИЯ К ВАЖНОМУ", right_x, top_y, result["toward"]),
+        ("ВНУТРЕННИЙ ОПЫТ · УМ И ТЕЛО", left_x, bottom_y, result["inner"]),
+        ("ДЕЙСТВИЯ ОТ ДИСКОМФОРТА", right_x, bottom_y, result["away"]),
     ]
 
     body = svg_text(
@@ -2070,21 +2127,27 @@ def render_act_matrix():
         size=16,
         max_chars=112,
         max_lines=1,
+        color=act_palette["ink"],
     )
 
-    for x, y, label, value in quadrants:
+    for label, x, y, value in quadrants:
         body += (
             f'<rect x="{x}" y="{y}" width="{box_width}" '
-            f'height="{box_height}" rx="16" fill="#FFFFFF" '
-            f'stroke="#80AFCB" stroke-width="2"/>'
+            f'height="{box_height}" rx="16" fill="{act_palette["panel"]}" '
+            f'stroke="{act_palette["panel_border"]}" stroke-width="2"/>'
+        )
+        body += (
+            f'<rect x="{x}" y="{y}" width="{box_width}" '
+            f'height="48" rx="16" fill="{act_palette["title_bg"]}" '
+            f'stroke="{act_palette["panel_border"]}" stroke-width="1.5"/>'
         )
         body += svg_text(
-            x + 20,
-            y + 36,
+            x + 18,
+            y + 27,
             label,
             size=16,
             weight=700,
-            color="#234D6B",
+            color=act_palette["ink"],
             max_chars=56,
             max_lines=1,
         )
@@ -2103,13 +2166,14 @@ def render_act_matrix():
                 size=16,
                 max_chars=55,
                 max_lines=1,
+                color=act_palette["text"],
             )
         else:
             for index, item in enumerate(items):
                 item_y = y + 82 + index * 26
                 body += (
                     f'<circle cx="{x + 25}" cy="{item_y - 5}" '
-                    f'r="5" fill="#80AFCB"/>'
+                    f'r="5" fill="{act_palette["mark"]}"/>'
                 )
                 body += svg_text(
                     x + 43,
@@ -2118,6 +2182,7 @@ def render_act_matrix():
                     size=16,
                     max_chars=55,
                     max_lines=1,
+                    color=act_palette["text"],
                 )
 
     body += (
@@ -2136,9 +2201,10 @@ def render_act_matrix():
         size=15,
         max_chars=125,
         max_lines=2,
+        color=act_palette["ink"],
     )
 
-    svg = make_svg(width, height, "ACT-матрица · замечать и выбирать", body)
+    svg = make_svg(width, height, "ACT-матрица · замечать и выбирать", body, accent="#D9ECFB")
     render_visualization(
         svg,
         "act_matrix.svg",
