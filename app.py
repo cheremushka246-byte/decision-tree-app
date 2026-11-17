@@ -574,6 +574,7 @@ def render_home():
               Выбирайте инструмент и исследуйте важные вопросы в удобном темпе.
             </div>
           </div>
+
           <div class="hero-art" aria-hidden="true">
             <svg viewBox="0 0 440 300" xmlns="http://www.w3.org/2000/svg">
               <path d="M225 18 C155 8 100 48 89 108 C81 151 99 180 72 204
@@ -839,13 +840,13 @@ def svg_text(
 
 
 def make_svg(width, height, title, body, accent="#D9EEFA"):
-    background_fill = f"url(#bgGrad_{accent.replace('#','')})"
+    gradient_id = f"bgGrad_{accent.replace('#', '')}"
     return f"""
     <svg xmlns="http://www.w3.org/2000/svg"
          width="{width}" height="{height}"
          viewBox="0 0 {width} {height}">
       <defs>
-        <linearGradient id="bgGrad_{accent.replace('#','')}" x1="0%" x2="100%" y1="0%" y2="100%">
+        <linearGradient id="{gradient_id}" x1="0%" x2="100%" y1="0%" y2="100%">
           <stop offset="0%" stop-color="#F8FCFF"/>
           <stop offset="100%" stop-color="#EAF5FC"/>
         </linearGradient>
@@ -853,7 +854,7 @@ def make_svg(width, height, title, body, accent="#D9EEFA"):
           <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#7AAEC7" flood-opacity="0.16"/>
         </filter>
       </defs>
-      <rect width="100%" height="100%" fill="{background_fill}" rx="18"/>
+      <rect width="100%" height="100%" fill="url(#{gradient_id})" rx="18"/>
       <g opacity="0.18">
         <path d="M0 200 L120 150 L200 220 L320 180 L520 250" stroke="#8BBDDB" fill="none" stroke-width="1.5"/>
         <path d="M140 540 L310 450 L470 520 L700 430 L860 520" stroke="#8BBDDB" fill="none" stroke-width="1.5"/>
@@ -1295,16 +1296,17 @@ def render_decision_tree():
     )
 
     decision_palette = {
-        "root": "#0d5c89",
+        "root": "#0D5C89",
         "root_fill": "#D7EEFA",
         "branch": "#7CB6D8",
         "option_fill": "#EFF9FF",
         "option_border": "#9AD0EC",
         "scenario_fill": "#FFFFFF",
         "scenario_border": "#C6E3F4",
-        "best": "#2E9C7A",
-        "best_border": "#61C29A",
-        "text": "#214D6C",
+        "best": "#DDF5E8",
+        "best_border": "#38A878",
+        "ink": "#214D6C",
+        "text": "#3A678B",
     }
 
     column_width = 430
@@ -1645,114 +1647,209 @@ def render_chain():
                 f'Навык/поддержка: {link["skill"] or "—"}'
             )
 
-    width = 1180
-    row_height = 142
-    height = 265 + len(result["links"]) * row_height + 190
+    width = 1200
+    top_card_y = 82
+    top_card_w = 360
+    top_card_h = 94
+    chain_y = 220
+    row_height = 152
+    chain_card_h = 128
+    footer_gap = 24
+    footer_y = chain_y + len(result["links"]) * row_height + footer_gap
+    height = footer_y + 180
 
     dbt_palette = {
-        "bg": "#EEF6FA",
-        "header": "#C8E7F6",
-        "card": "#FFFFFF",
-        "card_border": "#B8D9EE",
-        "line": "#7AAABD",
-        "ink": "#214D6C",
-        "text": "#3C6888",
+        "ink": "#493B72",
+        "text": "#554E70",
+        "line": "#A18ACB",
+        "vulnerability": "#EEE8FA",
+        "trigger": "#FFF0D8",
+        "behavior": "#FCE4E4",
+        "link_a": "#E7F5F2",
+        "link_b": "#EAF1FC",
+        "consequence": "#FFF3E7",
+        "repair": "#E8F4E8",
+        "white": "#FFFFFF",
     }
 
     body = ""
 
-    for row_index, (label, value) in enumerate([
-        ("Факторы уязвимости", result["vulnerability"]),
-        ("Провоцирующее событие", result["trigger"]),
-        ("Проблемное поведение", result["target"]),
-    ]):
-        y = 75 + row_index * 58
-        body += (
-            f'<rect x="40" y="{y}" width="1100" height="46" rx="10" '
-            f'fill="{dbt_palette["header"]}" stroke="{dbt_palette["line"]}"/>'
-        )
-        body += svg_text(
-            54, y + 19, label,
-            size=13, weight=700, color=dbt_palette["ink"],
-            max_chars=30, max_lines=1,
-        )
-        body += svg_text(
-            285, y + 19, value,
-            size=13, max_chars=108, max_lines=1,
-            color=dbt_palette["text"],
-        )
+    top_cards = [
+        (
+            "ФАКТОРЫ УЯЗВИМОСТИ",
+            result["vulnerability"],
+            dbt_palette["vulnerability"],
+        ),
+        (
+            "ПРОВОЦИРУЮЩЕЕ СОБЫТИЕ",
+            result["trigger"],
+            dbt_palette["trigger"],
+        ),
+        (
+            "ПРОБЛЕМНОЕ ПОВЕДЕНИЕ",
+            result["target"],
+            dbt_palette["behavior"],
+        ),
+    ]
 
-    for index, link in enumerate(result["links"]):
-        y = 258 + index * row_height
+    card_xs = [40, 420, 800]
 
+    for x, (label, value, fill) in zip(card_xs, top_cards):
         body += (
-            f'<rect x="40" y="{y}" width="1100" height="118" rx="13" '
-            f'fill="{dbt_palette["card"]}" stroke="{dbt_palette["card_border"]}"/>'
+            f'<rect x="{x}" y="{top_card_y}" width="{top_card_w}" '
+            f'height="{top_card_h}" rx="16" fill="{fill}" '
+            f'stroke="#C8BDE0" stroke-width="2"/>'
         )
         body += svg_text(
-            56, y + 25, f"Звено {index + 1}",
-            size=15, weight=700, color=dbt_palette["ink"],
+            x + 17,
+            top_card_y + 29,
+            label,
+            size=14,
+            weight=700,
+            color=dbt_palette["ink"],
+            max_chars=38,
             max_lines=1,
         )
         body += svg_text(
-            200, y + 24,
+            x + 17,
+            top_card_y + 58,
+            value,
+            size=15,
+            color=dbt_palette["text"],
+            max_chars=42,
+            max_lines=2,
+        )
+
+    body += (
+        f'<line x1="{width // 2}" y1="{top_card_y + top_card_h}" '
+        f'x2="{width // 2}" y2="{chain_y - 16}" '
+        f'stroke="{dbt_palette["line"]}" stroke-width="4"/>'
+    )
+
+    for index, link in enumerate(result["links"]):
+        y = chain_y + index * row_height
+        fill = dbt_palette["link_a"] if index % 2 == 0 else dbt_palette["link_b"]
+
+        body += (
+            f'<rect x="40" y="{y}" width="1120" height="{chain_card_h}" '
+            f'rx="17" fill="{fill}" stroke="#B6A8D8" stroke-width="2"/>'
+        )
+        body += (
+            f'<rect x="40" y="{y}" width="10" height="{chain_card_h}" '
+            f'rx="5" fill="{dbt_palette["line"]}"/>'
+        )
+        body += (
+            f'<circle cx="82" cy="{y + 36}" r="22" '
+            f'fill="#FFFFFF" stroke="{dbt_palette["line"]}" stroke-width="2"/>'
+        )
+        body += svg_text(
+            74,
+            y + 42,
+            str(index + 1),
+            size=17,
+            weight=700,
+            color=dbt_palette["ink"],
+            max_chars=3,
+            max_lines=1,
+        )
+
+        body += svg_text(
+            120,
+            y + 31,
             f'Мысль: {link["thought"]} · Эмоция: {link["emotion"]} · '
             f'Импульс: {link["urge"]}',
-            size=13, max_chars=112, max_lines=1,
+            size=15,
             color=dbt_palette["text"],
+            max_chars=112,
+            max_lines=1,
         )
         body += svg_text(
-            200, y + 54,
+            120,
+            y + 65,
             f'Ощущения: {link["body"]} · Действие: {link["action"]}',
-            size=13, max_chars=112, max_lines=1,
+            size=15,
             color=dbt_palette["text"],
+            max_chars=112,
+            max_lines=1,
         )
         body += svg_text(
-            200, y + 84,
-            f'Вмешательство: {link["intervention"]} · Навык: {link["skill"]}',
-            size=13, max_chars=112, max_lines=1,
-            color=dbt_palette["text"],
+            120,
+            y + 99,
+            f'Точка вмешательства: {link["intervention"]} · '
+            f'Навык: {link["skill"]}',
+            size=15,
+            color=dbt_palette["ink"],
+            max_chars=112,
+            max_lines=1,
         )
 
         if index < len(result["links"]) - 1:
             body += (
-                f'<line x1="590" y1="{y + 118}" x2="590" '
-                f'y2="{y + row_height}" stroke="{dbt_palette["line"]}" '
-                f'stroke-width="2"/>'
+                f'<line x1="{width // 2}" y1="{y + chain_card_h}" '
+                f'x2="{width // 2}" y2="{y + row_height}" '
+                f'stroke="{dbt_palette["line"]}" stroke-width="4"/>'
             )
 
-    footer_y = 258 + len(result["links"]) * row_height
-
-    for index, (label, value) in enumerate([
-        ("Последствия сразу", result["immediate"]),
-        ("Отсроченные последствия", result["later"]),
+    footer_cards = [
         (
-            "Профилактика / восстановление",
-            f'{result["prevention"]} · {result["repair"]}',
+            "ПОСЛЕДСТВИЯ СРАЗУ",
+            result["immediate"],
+            dbt_palette["consequence"],
         ),
-    ]):
-        y = footer_y + index * 52
+        (
+            "ОТСРОЧЕННЫЕ ПОСЛЕДСТВИЯ",
+            result["later"],
+            dbt_palette["consequence"],
+        ),
+        (
+            "ПЛАН ПРОФИЛАКТИКИ И ВОССТАНОВЛЕНИЯ",
+            f'{result["prevention"]} · {result["repair"]}',
+            dbt_palette["repair"],
+        ),
+    ]
+
+    footer_card_w = 360
+    footer_card_h = 108
+
+    for x, (label, value, fill) in zip(card_xs, footer_cards):
         body += (
-            f'<rect x="40" y="{y}" width="1100" height="42" rx="9" '
-            f'fill="{dbt_palette["header"]}" stroke="{dbt_palette["line"]}"/>'
+            f'<rect x="{x}" y="{footer_y}" width="{footer_card_w}" '
+            f'height="{footer_card_h}" rx="16" fill="{fill}" '
+            f'stroke="#C8BDE0" stroke-width="2"/>'
         )
         body += svg_text(
-            54, y + 18, label,
-            size=12, weight=700, color=dbt_palette["ink"],
-            max_chars=33, max_lines=1,
+            x + 17,
+            footer_y + 31,
+            label,
+            size=14,
+            weight=700,
+            color=dbt_palette["ink"],
+            max_chars=38,
+            max_lines=1,
         )
         body += svg_text(
-            285, y + 18, value,
-            size=12, max_chars=104, max_lines=1,
+            x + 17,
+            footer_y + 63,
+            value,
+            size=15,
             color=dbt_palette["text"],
+            max_chars=42,
+            max_lines=2,
         )
 
-    svg = make_svg(width, height, "ДБТ · анализ цепочки и решений", body, accent="#CFE7F4")
+    svg = make_svg(
+        width,
+        height,
+        "ДБТ · анализ цепочки и решений",
+        body,
+        accent="#E8DFF7",
+    )
     render_visualization(
         svg,
         "dbt_chain.svg",
-        "Карта показывает уязвимости, запускающее событие, звенья, "
-        "последствия и возможные места для навыков или поддержки.",
+        "Цветовая карта показывает уязвимости, запуск события, "
+        "последовательность звеньев и последствия. Схему можно масштабировать, "
+        "перемещать и скачать.",
     )
 
 
